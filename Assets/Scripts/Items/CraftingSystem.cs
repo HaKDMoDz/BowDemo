@@ -15,9 +15,9 @@ public class CraftingSystem : SingletonComponent<CraftingSystem>
     
     Rect craftingWindowRect = new Rect(Screen.width/2 - 250, Screen.height / 2-100, 500, 300);
     Rect buttonRect = new Rect(10, 20, 150, 50);
-    //buttonRect = new Rect(craftingWindowRect.x + 10, craftingWindowRect.y + 10, 150, 50);
 
     ArrowTemplate arrowTemplate;
+    
     void Start()
     {
         InputManager.Instance.OnKeyboardPress += KeyPress;
