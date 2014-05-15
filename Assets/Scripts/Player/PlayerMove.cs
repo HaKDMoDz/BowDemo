@@ -85,14 +85,9 @@ public class PlayerMove : MonoBehaviour
 
     void OnCollisionStay(Collision col)
     {
-        foreach (ContactPoint contact in col.contacts)
-        {
-            if (Vector3.Angle(contact.normal, Vector3.up) < movementProperties.maxSlope)
-            {
-                grounded = true;
-                break;
-            }
-        }
+        //the player is grounded if any of contact points are at a lower slope than 60
+        grounded = col.contacts
+            .Any(contact => Vector3.Angle(contact.normal, Vector3.up) < movementProperties.maxSlope);
     }
     void OnCollisionExit()
     {
