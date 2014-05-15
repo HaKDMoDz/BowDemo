@@ -7,7 +7,7 @@ using System.Linq;
 [Serializable]
 public class MovementProperties
 {
-    public float moveSpeed = 10f;
+    public float moveForce = 10f;
     public float decelerationTime = 0.2f;
     public float maxSpeed = 15f;
     public float jumpForce = 50f;
@@ -54,7 +54,7 @@ public class PlayerMove : MonoBehaviour
             rigidbody.SetVelocityZ(horizontalVelocity.y);
 
             //this moves the player
-            rigidbody.AddRelativeForce(horizontal * movementProperties.moveSpeed, 0f, vertical * movementProperties.moveSpeed);
+            rigidbody.AddRelativeForce(horizontal * movementProperties.moveForce, 0f, vertical * movementProperties.moveForce);
         }
     }
 
@@ -78,9 +78,10 @@ public class PlayerMove : MonoBehaviour
 
     public void Jump()
     {
-        //rigidbody.AddForce(transform.up * movementProperties.jumpForce);
-        if(grounded)
-            rigidbody.SetVelocityY(movementProperties.jumpForce);
+        if (grounded)
+            rigidbody.AddForce(new Vector3(0f, movementProperties.jumpForce,0f));
+        
+        //    rigidbody.SetVelocityY(movementProperties.jumpForce);
     }
 
     void OnCollisionStay(Collision col)
@@ -93,4 +94,5 @@ public class PlayerMove : MonoBehaviour
     {
         grounded = false;
     }
+   
 }
