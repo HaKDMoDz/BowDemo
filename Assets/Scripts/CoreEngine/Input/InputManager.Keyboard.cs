@@ -3,6 +3,16 @@ using System.Collections;
 
 public partial class InputManager
 {
+    
+    //checks Movement axes
+    void CheckMovementAxes()
+    {
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+
+        OnMovementAxis(new MovementAxisArgs(horizontal, vertical));
+    }
+    
     //checks for keyboard input
     void CheckKeyboardPress()
     {

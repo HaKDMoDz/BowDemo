@@ -1,19 +1,23 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Linq;
 
 //for easy inspector changes and persistence
 [Serializable]
 public class MovementProperties
 {
     public float moveSpeed = 10f;
+    public float decelerationTime = 0.2f;
     public float maxSpeed = 15f;
+    public float jumpForce = 50f;
+    public float maxSlope = 60f;
+
     public float horizontalLookSensitivity = 15f;
     public float verticalLookSensitivity = 15f;
+
     public float maxVerticalLookAngle = 60f;
     public float minVerticalLookAngle = -60f;
-    public float jumpForce = 50f;
-    
 }
 
 
@@ -21,36 +25,43 @@ public class PlayerMove : MonoBehaviour
 {
     public Camera playerCamera;
     public MovementProperties movementProperties;
+
     float currentVerticalAngle = 0f;
+    float currentVelX;
+    float currentVelZ;
 
-    public void Move(Vector2 direction)
+    bool grounded = false;
+
+    public void Move(float horizontal, float vertical)
     {
-        //Vector3 newVel = Vector3.zero;
-        //newVel += transform.forward * direction.y * movementProperties.moveSpeed*Time.deltaTime;
-        //newVel += transform.right * direction.x * movementProperties.moveSpeed*Time.deltaTime;
-        //rigidbody.velocity = newVel;
-        
-        //making sure player doesn't keep accelerating
-        Vector2 horizontalVelocity = new Vector2(rigidbody.velocity.x, rigidbody.velocity.z);
-        if (horizontalVelocity.magnitude > movementProperties.maxSpeed)
+        //friction to slow down when not pressing any movement keys
+        if (horizontal == 0.0f && vertical == 0.0f && grounded)
         {
-            horizontalVelocity.Normalize();
-            horizontalVelocity *= movementProperties.maxSpeed;
+            rigidbody.SetVelocityX(Mathf.SmoothDamp(rigidbody.velocity.x, 0.0f, ref currentVelX, movementProperties.decelerationTime));
+            rigidbody.SetVelocityZ(Mathf.SmoothDamp(rigidbody.velocity.z, 0.0f, ref currentVelZ, movementProperties.decelerationTime));
         }
+        
+        {
+            //making sure player doesn't keep accelerating past max speed
+            Vector2 horizontalVelocity = new Vector2(rigidbody.velocity.x, rigidbody.velocity.z);
 
-        rigidbody.SetVelocityX(horizontalVelocity.x);
-        rigidbody.SetVelocityZ(horizontalVelocity.y);
+            if (horizontalVelocity.sqrMagnitude > (movementProperties.maxSpeed * movementProperties.maxSpeed))
+            {
+                horizontalVelocity.Normalize();
+                horizontalVelocity *= movementProperties.maxSpeed;
+            }
+            rigidbody.SetVelocityX(horizontalVelocity.x);
+            rigidbody.SetVelocityZ(horizontalVelocity.y);
 
-
-        //this moves the player
-        rigidbody.AddRelativeForce(direction.x * movementProperties.moveSpeed, 0f, direction.y * movementProperties.moveSpeed);
-
+            //this moves the player
+            rigidbody.AddRelativeForce(horizontal * movementProperties.moveSpeed, 0f, vertical * movementProperties.moveSpeed);
+        }
     }
-    
+
     public void RotateLook(Vector2 turnDirection)
     {
         //player can rotate left and right
-        if(Mathf.Abs(turnDirection.x)>0.0f)
+        if (Mathf.Abs(turnDirection.x) > 0.0f)
         {
             //rotate around Y axis to turn horizontally
             transform.RotateAroundYAxis(turnDirection.x * movementProperties.horizontalLookSensitivity);
@@ -67,12 +78,24 @@ public class PlayerMove : MonoBehaviour
 
     public void Jump()
     {
-        Debug.Log("jump");
-        rigidbody.AddForce(transform.up * movementProperties.jumpForce);
+        //rigidbody.AddForce(transform.up * movementProperties.jumpForce);
+        if(grounded)
+            rigidbody.SetVelocityY(movementProperties.jumpForce);
     }
-    void Update()
+
+    void OnCollisionStay(Collision col)
     {
-        //Debug.Log(rigidbody.velocity.magnitude);
+        foreach (ContactPoint contact in col.contacts)
+        {
+            if (Vector3.Angle(contact.normal, Vector3.up) < movementProperties.maxSlope)
+            {
+                grounded = true;
+                break;
+            }
+        }
     }
-    
+    void OnCollisionExit()
+    {
+        grounded = false;
+    }
 }

@@ -10,12 +10,22 @@ public class PlayerInput : SingletonComponent<PlayerInput> {
 
     void Start()
     {
-        InputManager.Instance.OnKeyboardPress += KeyPress;
+        InputManager.Instance.OnMovementAxis += MovementAxis;
         InputManager.Instance.OnMouseMove += MouseMove;
+        
         InputManager.Instance.OnMouseClick += MouseClick;
+        InputManager.Instance.OnKeyboardPress += KeyPress;
 
         playerMove = gameObject.GetSafeComponent<PlayerMove>();
         playerAttack = gameObject.GetSafeComponent<PlayerAttack>();
+    }
+
+    void MovementAxis(MovementAxisArgs args)
+    {
+        if(canMove)
+        {
+            playerMove.Move(args.horizontal, args.vertical);
+        }
     }
 
     void MouseClick(MouseEventArgs args)
@@ -33,25 +43,25 @@ public class PlayerInput : SingletonComponent<PlayerInput> {
     {
         if (canMove)
         {
-            Vector2 moveDir = Vector2.zero;
+            //Vector2 moveDir = Vector2.zero;
 
-            if (args.key == KeyCode.W)
-            {
-                moveDir.y = 1f;
-            }
-            else if (args.key == KeyCode.S)
-            {
-                moveDir.y = -1f;
-            }
-            if (args.key == KeyCode.A)
-            {
-                moveDir.x = -1f;
-            }
-            else if (args.key == KeyCode.D)
-            {
-                moveDir.x = 1f;
-            }
-            playerMove.Move(moveDir);
+            //if (args.key == KeyCode.W)
+            //{
+            //    moveDir.y = 1f;
+            //}
+            //else if (args.key == KeyCode.S)
+            //{
+            //    moveDir.y = -1f;
+            //}
+            //if (args.key == KeyCode.A)
+            //{
+            //    moveDir.x = -1f;
+            //}
+            //else if (args.key == KeyCode.D)
+            //{
+            //    moveDir.x = 1f;
+            //}
+            //playerMove.Move(moveDir);
 
             if (args.key == KeyCode.Space && args.keyState == KeyboardEventArgs.KeyState.Down)
             {
